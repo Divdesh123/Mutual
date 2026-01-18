@@ -1,0 +1,46 @@
+from fastapi import FastAPI, Depends, Header, HTTPException
+import supabase
+from supabase import create_client, Client
+
+def get_user_id(authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    jwt = authorization.split(" ")[1]
+
+    user = supabase.auth.get_user(jwt).user
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid user")
+
+    return user.id
+
+def update_type(user_id: str, new_type: str):
+    supabase.table("requests") \
+        .update({"type": new_type}) \
+        .eq("from_user", user_id) \
+        .neq("type", "friend") \
+        .execute()
+
+def set_committed(user_a: str, user_b: str):
+    # user_a commits to user_b
+    supabase.table("users") \
+        .update({"committed_to": user_b}) \
+        .eq("id", user_a) \
+        .execute()
+    update_type(user_a, "friend")
+    # user_b commits to user_a
+    supabase.table("users") \
+        .update({"committed_to": user_a}) \
+        .eq("id", user_b) \
+        .execute()
+    update_type(user_b, "friend")
+
+def add_friends(user_a: str, user_b: str):
+    supabase.table("friends").insert([{"usera": user_a, "userb": user_b},])\
+        .execute()
+    
+
+
+
+
