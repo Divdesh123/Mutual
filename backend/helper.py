@@ -43,4 +43,10 @@ def add_friends(user_a: str, user_b: str):
 
 
 
-
+def remove_request(from_user: str, to_user: str, type: str):
+    supabase.table("requests") \
+        .delete() \
+        .eq("from_user", from_user) \
+        .eq("to_user", to_user) \
+        .eq("type", type) \
+        .execute()
