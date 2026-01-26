@@ -28,13 +28,13 @@ def set_committed(user_a: str, user_b: str):
         .update({"committed_to": user_b}) \
         .eq("id", user_a) \
         .execute()
-    update_type(user_a, "friend")
+    remove_request(user_a, user_b, "like")
     # user_b commits to user_a
     supabase.table("users") \
         .update({"committed_to": user_a}) \
         .eq("id", user_b) \
         .execute()
-    update_type(user_b, "friend")
+    remove_request(user_b, user_a, "like")
 
 def add_friends(user_a: str, user_b: str):
     supabase.table("friends").insert([{"usera": user_a, "userb": user_b},])\
@@ -49,4 +49,9 @@ def remove_request(from_user: str, to_user: str, type: str):
         .eq("from_user", from_user) \
         .eq("to_user", to_user) \
         .eq("type", type) \
+        .execute()
+
+def add_request(from_user: str, to_user: str, type: str):
+    supabase.table("requests") \
+        .insert([{"from_user": from_user, "to_user": to_user, "type": type}]) \
         .execute()
