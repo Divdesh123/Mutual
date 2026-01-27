@@ -15,11 +15,11 @@ def get_user_id(authorization: str = Header(...)):
 
     return user.id
 
-def update_type(user_id: str, new_type: str):
+def update_type(from_user: str, to_user: str, new_type: str):
     supabase.table("requests") \
         .update({"type": new_type}) \
-        .eq("from_user", user_id) \
-        .neq("type", "friend") \
+        .eq("from_user", from_user) \
+        .eq("to_user", to_user) \
         .execute()
 
 def set_committed(user_a: str, user_b: str):
@@ -55,3 +55,12 @@ def add_request(from_user: str, to_user: str, type: str):
     supabase.table("requests") \
         .insert([{"from_user": from_user, "to_user": to_user, "type": type}]) \
         .execute()
+    
+def check_request(from_user: str, to_user: str, type: str):
+    res = supabase.table("requests") \
+        .select("*") \
+        .eq("from_user", from_user) \
+        .eq("to_user", to_user) \
+        .eq("type", type) \
+        .execute()
+    return res.data
